@@ -28,8 +28,8 @@ import (
 )
 
 const (
-      mandrill_uri     = "mandrillapp.com/api/"
-      mandrill_version = "1.0"
+	mandrill_uri     = "mandrillapp.com/api/"
+	mandrill_version = "1.0"
 )
 
 type MandrillAPI struct {
@@ -60,6 +60,8 @@ const debug bool = false
 
 var mailchimp_datacenter = regexp.MustCompile("[a-z]+[0-9]+$")
 
+var _httpClient = http.DefaultClient
+
 func NewChimp(apiKey string, https bool) *ChimpAPI {
 	u := url.URL{}
 	if https {
@@ -81,8 +83,9 @@ func runChimp(api *ChimpAPI, path string, parameters interface{}) ([]byte, error
 	if debug {
 		log.Printf("Request URL:%s", requestUrl)
 	}
-	client := &http.Client{Transport: api.Transport}
-	resp, err := client.Post(requestUrl, "application/json", bytes.NewBuffer(b))
+	//TODO: no Transport assigned during the API creation
+	//client := &http.Client{Transport: api.Transport}
+	resp, err := _httpClient.Post(requestUrl, "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +101,10 @@ func runChimp(api *ChimpAPI, path string, parameters interface{}) ([]byte, error
 		return nil, err
 	}
 	return body, nil
+}
+
+func SetHttpClient(client *http.Client) {
+	_httpClient = client
 }
 
 func runMandrill(api *MandrillAPI, path string, parameters map[string]interface{}) ([]byte, error) {
@@ -116,8 +123,9 @@ func runMandrill(api *MandrillAPI, path string, parameters map[string]interface{
 	if debug {
 		log.Printf("Request URL:%s", requestUrl)
 	}
-	client := &http.Client{Transport: api.Transport}
-	resp, err := client.Post(requestUrl, "application/json", bytes.NewBuffer(b))
+	//TODO: no Transport assigned during the API creation
+	//client := &http.Client{Transport: api.Transport}
+	resp, err := _httpClient.Post(requestUrl, "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
